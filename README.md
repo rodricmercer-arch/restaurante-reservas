@@ -33,3 +33,6 @@ La app queda disponible en: http://localhost:8080
 - Al reservar, el **plato principal es obligatorio**; postre y bebida son opcionales.
 - El admin puede **crear/eliminar mesas y platos**, ver todas las reservas, **cancelarlas** o **moverlas** a otra mesa libre.
 - Login con **DNI + contraseña** (BCrypt) para ambos roles.
+
+## Autenticación y Seguridad
+El sistema cuenta con inicio de sesión y gestión de acceso basada en los roles ADMIN y CLIENTE.
