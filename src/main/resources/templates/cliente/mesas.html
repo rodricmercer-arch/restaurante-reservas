@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesas disponibles - Restaurante</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: navbar('mesas')}"></div>
+
+<div class="container container-narrow">
+
+    <div class="hero-section">
+        <div>
+            <div class="hero-eyebrow">Reserva de mesas</div>
+            <h1 class="hero-title">Elige tu mesa</h1>
+            <p class="hero-subtitle">Selecciona la mesa perfecta para tu velada</p>
+        </div>
+        <div class="hero-stats">
+            <div class="hero-stat libres">
+                <span class="num" th:text="${mesas.?[estado.name() == 'LIBRE'].size()}">0</span>
+                <span class="lbl">Libres</span>
+            </div>
+            <div class="hero-stat reservadas">
+                <span class="num" th:text="${mesas.?[estado.name() == 'RESERVADA'].size()}">0</span>
+                <span class="lbl">Reservadas</span>
+            </div>
+            <div class="hero-stat">
+                <span class="num" th:text="${mesas.size()}">0</span>
+                <span class="lbl">Total</span>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${reservaActiva != null}" class="alert-reserva-activa">
+        <i class="fas fa-circle-info text-warning fs-5"></i>
+        <div>
+            Ya tienes una reserva activa en la <strong>Mesa <span th:text="${reservaActiva.mesa.numero}"></span></strong>.
+            Ve a <a th:href="@{/cliente/mireserva}" class="fw-bold" style="color: var(--accent)">Mi reserva</a> si deseas cancelarla antes de reservar otra.
+        </div>
+    </div>
+
+    <div class="filter-tabs">
+        <button type="button" class="filter-tab active" data-filter="todas">Todas</button>
+        <button type="button" class="filter-tab" data-filter="LIBRE"><span class="dot" style="background:var(--green)"></span>Libres</button>
+        <button type="button" class="filter-tab" data-filter="RESERVADA"><span class="dot" style="background:var(--accent)"></span>Reservadas</button>
+    </div>
+
+    <div class="row g-3 mb-5">
+        <div class="col-6 col-md-4 col-lg-3 mesa-item" th:each="mesa : ${mesas}" th:attr="data-estado=${mesa.estado.name()}">
+            <div class="card-mesa p-3">
+                <div class="mesa-top">
+                    <span class="badge-estado" th:classappend="${mesa.estado.name() == 'LIBRE'} ? 'libre' : 'reservada'">
+                        <span class="dot"></span>
+                        <span th:text="${mesa.estado.name() == 'LIBRE'} ? 'Libre' : 'Reservada'"></span>
+                    </span>
+                </div>
+                <div class="mesa-numero">Mesa <span th:text="${mesa.numero}"></span></div>
+                <div class="mesa-cap">
+                    <i class="fas fa-user-group"></i>
+                    <span th:text="${mesa.capacidad}"></span> personas
+                </div>
+                <div class="mesa-dots">
+                    <span th:each="i : ${#numbers.sequence(1, mesa.capacidad)}"></span>
+                </div>
+
+                <a th:if="${mesa.estado.name() == 'LIBRE' and reservaActiva == null}"
+                   th:href="@{/cliente/reservar/{id}(id=${mesa.id})}"
+                   class="btn-reservar d-block text-center">Reservar mesa</a>
+                <button th:unless="${mesa.estado.name() == 'LIBRE' and reservaActiva == null}"
+                        class="btn-nodisponible" disabled
+                        th:text="${mesa.estado.name() == 'LIBRE'} ? 'Ya tienes una reserva' : 'No disponible'"></button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    document.querySelectorAll('.filter-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const filtro = tab.getAttribute('data-filter');
+            document.querySelectorAll('.mesa-item').forEach(function (item) {
+                if (filtro === 'todas' || item.getAttribute('data-estado') === filtro) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
