@@ -3,22 +3,59 @@
 <head><meta charset="UTF-8"></head>
 <body>
 <nav th:fragment="navbar(activo)" class="navbar navbar-expand navbar-restaurante px-3 mb-4">
-    <a class="navbar-brand" href="#">
+    <a class="navbar-brand" th:href="@{/}">
         <span class="brand-badge"><i class="fas fa-utensils"></i></span>
         Restaurante
     </a>
     <div class="navbar-nav">
+
+        <a class="nav-link" th:classappend="${activo == 'mesas'} ? 'fw-bold' : ''" th:href="@{/}" sec:authorize="isAnonymous()">Mesas</a>
+        <a class="nav-link" th:classappend="${activo == 'carta'} ? 'fw-bold' : ''" th:href="@{/carta}" sec:authorize="isAnonymous()">Carta</a>
+        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#modalLoginRequerido" sec:authorize="isAnonymous()">Mi reserva</a>
         <a class="nav-link" th:classappend="${activo == 'mesas'} ? 'fw-bold' : ''" th:href="@{/cliente/mesas}" sec:authorize="hasRole('CLIENTE')">Mesas</a>
+        <a class="nav-link" th:classappend="${activo == 'carta'} ? 'fw-bold' : ''" th:href="@{/carta}" sec:authorize="hasRole('CLIENTE')">Carta</a>
         <a class="nav-link" th:classappend="${activo == 'mireserva'} ? 'fw-bold' : ''" th:href="@{/cliente/mireserva}" sec:authorize="hasRole('CLIENTE')">Mi reserva</a>
 
         <a class="nav-link" th:classappend="${activo == 'dashboard'} ? 'fw-bold' : ''" th:href="@{/admin/dashboard}" sec:authorize="hasRole('ADMIN')">Panel</a>
         <a class="nav-link" th:classappend="${activo == 'mesas'} ? 'fw-bold' : ''" th:href="@{/admin/mesas}" sec:authorize="hasRole('ADMIN')">Mesas</a>
         <a class="nav-link" th:classappend="${activo == 'platos'} ? 'fw-bold' : ''" th:href="@{/admin/platos}" sec:authorize="hasRole('ADMIN')">Carta</a>
         <a class="nav-link" th:classappend="${activo == 'reservas'} ? 'fw-bold' : ''" th:href="@{/admin/reservas}" sec:authorize="hasRole('ADMIN')">Reservas</a>
+        <a class="nav-link" th:classappend="${activo == 'usuarios'} ? 'fw-bold' : ''" th:href="@{/admin/usuarios}" sec:authorize="hasRole('ADMIN')">Usuarios</a>
+        <a class="nav-link" th:classappend="${activo == 'reportes'} ? 'fw-bold' : ''" th:href="@{/reportes}" sec:authorize="hasRole('ADMIN')">Reportes</a>
+        <a class="nav-link" th:classappend="${activo == 'perfil'} ? 'fw-bold' : ''" th:href="@{/perfil}" sec:authorize="hasAnyRole('CLIENTE','ADMIN')">Mi perfil</a>
     </div>
-    <form th:action="@{/logout}" method="post" class="ms-auto">
+    <form th:action="@{/logout}" method="post" class="ms-auto" sec:authorize="isAuthenticated()">
         <button class="btn-logout" type="submit"><i class="fas fa-arrow-right-from-bracket me-1"></i> Cerrar sesión</button>
     </form>
+    <div class="ms-auto d-flex align-items-center gap-2" sec:authorize="isAnonymous()">
+        <a class="btn-nav-login" th:href="@{/login}">Iniciar sesión</a>
+        <a class="btn-nav-registro" th:href="@{/registro}">Registrarse</a>
+    </div>
 </nav>
+
+<div th:fragment="modalLoginRequerido" class="modal fade" id="modalLoginRequerido" tabindex="-1"
+     aria-labelledby="modalLoginRequeridoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center">
+            <div class="modal-body p-4">
+                <div class="modal-login-icon"><i class="fas fa-lock"></i></div>
+                <h5 class="fw-bold mb-2" id="modalLoginRequeridoLabel">Inicia sesión para continuar</h5>
+                <p class="text-muted mb-4">Para reservar una mesa o ver tu reserva necesitas una cuenta.</p>
+                <div class="d-grid gap-2">
+                    <a th:href="@{/login}" class="btn btn-danger">Iniciar sesión</a>
+                    <a th:href="@{/registro}" class="btn btn-outline-secondary">Crear cuenta</a>
+                    <button type="button" class="btn btn-link text-muted" data-bs-dismiss="modal">Seguir explorando</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--/* Foto de un plato con ícono de respaldo. Uso: platoImg(${plato}, 'dish-thumb' | 'dish-banner' | 'dish-mini') */-->
+<div th:fragment="platoImg(plato, clase)" class="dish-img" th:classappend="${clase}">
+    <i th:class="${plato.categoria.name() == 'PRINCIPAL' ? 'fas fa-utensils' : (plato.categoria.name() == 'POSTRE' ? 'fas fa-ice-cream' : 'fas fa-wine-glass')}"></i>
+    <img th:if="${plato.imagen != null and !plato.imagen.isBlank()}"
+         th:src="${#strings.startsWith(plato.imagen, 'http')} ? ${plato.imagen} : @{'/' + ${plato.imagen}}"
+         th:alt="${plato.nombre}" loading="lazy" onerror="this.remove()">
+</div>
 </body>
-</html>
