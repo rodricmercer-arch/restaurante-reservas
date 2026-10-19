@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear cuenta - Restaurante</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Diferencia clave con login.html: el body hace scroll (overflow-y:auto) y el contenedor usa min-height. */
+        body, html {
+            min-height: 100%;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            overflow-y: auto;
+        }
+
+        .bg-image {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://imgs.search.brave.com/vk87aIjLgXCKjk67ASrQFwYlG47o492wemWErSdVxtA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS1jZG4udHJpcGFk/dmlzb3IuY29tL21l/ZGlhL3Bob3RvLW8v/MDgvMzIvNTEvOWYv/aG90ZWwtbmVzLWFt/ZWxhbmQuanBn');
+            background-size: cover;
+            background-position: center;
+            filter: blur(8px) brightness(0.6);
+            transform: scale(1.1);
+            z-index: -1;
+        }
+
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            border-radius: 35px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            color: white;
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .restaurante-logo {
+            width: 70px;
+            height: 70px;
+            background: white;
+            color: #c0392b;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .form-label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .form-control {
+            border-radius: 12px;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+            color: white;
+            box-shadow: none;
+        }
+
+        .password-group {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .toggle-password {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-left: none;
+            color: white;
+            padding: 0 16px;
+            transition: all 0.3s;
+        }
+
+        .toggle-password:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .toggle-password:focus {
+            box-shadow: none;
+            outline: none;
+        }
+
+        .password-group .form-control {
+            border-right: none;
+        }
+
+        .btn-primary {
+            border-radius: 12px;
+            padding: 12px;
+            background: #c0392b;
+            border: none;
+            font-weight: 800;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary:hover {
+            background: #a5281a;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .field-error {
+            color: #ffb3ab;
+            font-size: 0.8rem;
+            margin-top: 6px;
+        }
+
+        .login-links {
+            margin-top: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .login-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .login-links a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .login-links a strong {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-image"></div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <div class="restaurante-logo">
+                <i class="fas fa-utensils"></i>
+            </div>
+            <h3 class="fw-bold mb-1">Crear cuenta</h3>
+            <p class="small mb-4 text-white-50">Regístrate para reservar tu mesa</p>
+
+            <form th:action="@{/registro}" th:object="${registro}" method="post" class="text-start">
+
+                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger rounded-3 text-center py-2 mb-3" style="background: rgba(220,53,69,0.2); border: 1px solid rgba(220,53,69,0.4); color: white;">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span th:each="err : ${#fields.globalErrors()}" th:text="${err}"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="dni">DNI</label>
+                    <input type="text" th:field="*{dni}" th:errorclass="border-danger" class="form-control"
+                           placeholder="8 dígitos" maxlength="8" inputmode="numeric" required autofocus>
+                    <div class="field-error" th:if="${#fields.hasErrors('dni')}" th:text="${#fields.errors('dni')[0]}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="nombre">NOMBRE COMPLETO</label>
+                    <input type="text" th:field="*{nombre}" th:errorclass="border-danger" class="form-control"
+                           placeholder="Tu nombre completo" maxlength="100" required>
+                    <div class="field-error" th:if="${#fields.hasErrors('nombre')}" th:text="${#fields.errors('nombre')[0]}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="password">CONTRASEÑA</label>
+                    <div class="input-group password-group">
+                        <input type="password" th:field="*{password}" th:errorclass="border-danger" class="form-control"
+                               placeholder="Mínimo 8 caracteres" required>
+                        <button type="button" class="toggle-password" data-target="password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="field-error" th:if="${#fields.hasErrors('password')}" th:text="${#fields.errors('password')[0]}"></div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label" for="confirmacion">CONFIRMAR CONTRASEÑA</label>
+                    <div class="input-group password-group">
+                        <input type="password" th:field="*{confirmacion}" th:errorclass="border-danger" class="form-control"
+                               placeholder="Repite la contraseña" required>
+                        <button type="button" class="toggle-password" data-target="confirmacion">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="field-error" th:if="${#fields.hasErrors('confirmacion')}" th:text="${#fields.errors('confirmacion')[0]}"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Crear cuenta</button>
+            </form>
+
+            <div class="login-links">
+                <a th:href="@{/login}">¿Ya tienes cuenta? <strong>Inicia sesión</strong></a>
+                <a th:href="@{/}"><i class="fas fa-arrow-left me-1"></i>Volver al inicio</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // OJITO MOSTRAR / OCULTAR CONTRASEÑA (uno por campo, según data-target)
+        document.querySelectorAll('.toggle-password').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const input = document.getElementById(btn.getAttribute('data-target'));
+                const icon = btn.querySelector('i');
+                const estabaOculta = input.getAttribute('type') === 'password';
+                input.setAttribute('type', estabaOculta ? 'text' : 'password');
+                icon.classList.toggle('fa-eye', !estabaOculta);
+                icon.classList.toggle('fa-eye-slash', estabaOculta);
+            });
+        });
+    </script>
+</body>
+</html>
