@@ -1,0 +1,35 @@
+name: CI Usuarios y Seguridad - Compilacion
+
+# Proposito: comprobar que el codigo principal y el de pruebas compilan.
+# Se ejecuta al hacer push a la rama del Integrante 1 y en cada Pull Request hacia dev o main.
+on:
+  push:
+    branches: [feature/usuarios-seguridad]
+  pull_request:
+    branches: [dev, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-usuarios-seguridad-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compilar:
+    name: Compilar (main y test)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Descargar el codigo
+        uses: actions/checkout@v6
+
+      - name: Preparar Java 17 con cache de Maven
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Compilar codigo principal y pruebas
+        run: mvn -B -ntp clean test-compile
