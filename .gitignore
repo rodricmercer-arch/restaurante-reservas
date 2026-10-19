@@ -1,0 +1,17 @@
+# Compilación de Maven (archivos pesados generados al compilar)
+/target/
+
+# Entornos de desarrollo e IDEs
+.vscode/
+.idea/
+*.iml
+.nbproject/
+nbproject/
+
+# Archivos del sistema y logs
+.DS_Store
+Thumbs.db
+*.log
+
+# Secretos locales (token y chat id del bot de Telegram): nunca se suben a Git
+config-local.properties
