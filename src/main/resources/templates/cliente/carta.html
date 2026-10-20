@@ -38,7 +38,8 @@
                                    th:data-name="${plato.nombre}" th:data-price="${plato.precio}"
                                    data-target="line-principal" required>
                             <div class="dish-card">
-                                <div>
+                                <div th:replace="~{fragments/layout :: platoImg(${plato}, 'dish-thumb')}"></div>
+                                <div class="dish-info">
                                     <div class="dish-name" th:text="${plato.nombre}"></div>
                                     <p class="dish-desc" th:text="${plato.descripcion}"></p>
                                 </div>
@@ -59,7 +60,10 @@
                                    th:data-name="${plato.nombre}" th:data-price="${plato.precio}"
                                    data-target="line-postre">
                             <div class="dish-card">
-                                <div class="dish-name" th:text="${plato.nombre}"></div>
+                                <div th:replace="~{fragments/layout :: platoImg(${plato}, 'dish-thumb')}"></div>
+                                <div class="dish-info">
+                                    <div class="dish-name" th:text="${plato.nombre}"></div>
+                                </div>
                                 <div class="text-end">
                                     <div class="dish-price">S/ <span th:text="${plato.precio}"></span></div>
                                     <div class="check-circle ms-auto mt-2"><i class="fas fa-check"></i></div>
@@ -86,7 +90,10 @@
                                    th:data-name="${plato.nombre}" th:data-price="${plato.precio}"
                                    data-target="line-bebida">
                             <div class="dish-card">
-                                <div class="dish-name" th:text="${plato.nombre}"></div>
+                                <div th:replace="~{fragments/layout :: platoImg(${plato}, 'dish-thumb')}"></div>
+                                <div class="dish-info">
+                                    <div class="dish-name" th:text="${plato.nombre}"></div>
+                                </div>
                                 <div class="text-end">
                                     <div class="dish-price">S/ <span th:text="${plato.precio}"></span></div>
                                     <div class="check-circle ms-auto mt-2"><i class="fas fa-check"></i></div>
