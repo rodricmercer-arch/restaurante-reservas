@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,10 +10,13 @@
 </head>
 <body>
 <div th:replace="~{fragments/layout :: navbar('mesas')}"></div>
+<th:block sec:authorize="isAnonymous()">
+    <div th:replace="~{fragments/layout :: modalLoginRequerido}"></div>
+</th:block>
 
 <div class="container container-narrow">
 
-    <div class="hero-section">
+    <div class="hero-section hero-con-imagen">
         <div>
             <div class="hero-eyebrow">Reserva de mesas</div>
             <h1 class="hero-title">Elige tu mesa</h1>
@@ -51,13 +54,17 @@
 
     <div class="row g-3 mb-5">
         <div class="col-6 col-md-4 col-lg-3 mesa-item" th:each="mesa : ${mesas}" th:attr="data-estado=${mesa.estado.name()}">
-            <div class="card-mesa p-3">
-                <div class="mesa-top">
-                    <span class="badge-estado" th:classappend="${mesa.estado.name() == 'LIBRE'} ? 'libre' : 'reservada'">
-                        <span class="dot"></span>
-                        <span th:text="${mesa.estado.name() == 'LIBRE'} ? 'Libre' : 'Reservada'"></span>
-                    </span>
+            <div class="card-mesa">
+                <div class="mesa-img"
+                     th:classappend="${mesa.capacidad <= 2 ? 'mesa-img-2' : (mesa.capacidad <= 4 ? 'mesa-img-4' : 'mesa-img-grupo')}">
+                    <div class="mesa-top">
+                        <span class="badge-estado" th:classappend="${mesa.estado.name() == 'LIBRE'} ? 'libre' : 'reservada'">
+                            <span class="dot"></span>
+                            <span th:text="${mesa.estado.name() == 'LIBRE'} ? 'Libre' : 'Reservada'"></span>
+                        </span>
+                    </div>
                 </div>
+                <div class="p-3">
                 <div class="mesa-numero">Mesa <span th:text="${mesa.numero}"></span></div>
                 <div class="mesa-cap">
                     <i class="fas fa-user-group"></i>
@@ -67,18 +74,30 @@
                     <span th:each="i : ${#numbers.sequence(1, mesa.capacidad)}"></span>
                 </div>
 
+                <!-- Caso 1: CLIENTE con sesión, mesa libre y sin reserva activa -->
                 <a th:if="${mesa.estado.name() == 'LIBRE' and reservaActiva == null}"
+                   sec:authorize="hasRole('CLIENTE')"
                    th:href="@{/cliente/reservar/{id}(id=${mesa.id})}"
                    class="btn-reservar d-block text-center">Reservar mesa</a>
+
+                <!-- Caso 2: visitante sin sesión, mesa libre -> abre el modal -->
+                <button th:if="${mesa.estado.name() == 'LIBRE' and reservaActiva == null}"
+                        sec:authorize="isAnonymous()"
+                        type="button" class="btn-reservar d-block text-center"
+                        data-bs-toggle="modal" data-bs-target="#modalLoginRequerido">Reservar mesa</button>
+
+                <!-- Caso 3: todo lo demás (condición actual, sin cambios) -->
                 <button th:unless="${mesa.estado.name() == 'LIBRE' and reservaActiva == null}"
                         class="btn-nodisponible" disabled
                         th:text="${mesa.estado.name() == 'LIBRE'} ? 'Ya tienes una reserva' : 'No disponible'"></button>
+                </div>
             </div>
         </div>
     </div>
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     document.querySelectorAll('.filter-tab').forEach(function (tab) {
         tab.addEventListener('click', function () {

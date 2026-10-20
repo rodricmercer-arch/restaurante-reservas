@@ -13,7 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -44,7 +47,7 @@ class PlatoRestControllerTest {
     @MockBean
     private CartaService cartaService;
 
-    // Necesario para que el SecurityConfig real (con CSRF deshabilitado) pueda
+     // Necesario para que el SecurityConfig real (CSRF activo, pero exento en /api/**) pueda
     // construirse dentro del contexto reducido de @WebMvcTest: SecurityConfig
     // depende de AppUserDetailsService, que aquí no se usa realmente
     // (no hay endpoints de login en este controlador), pero debe existir
@@ -53,6 +56,18 @@ class PlatoRestControllerTest {
     @MockBean
     private AppUserDetailsService appUserDetailsService;
 
+    // apiChain usa oauth2ResourceServer: necesita un JwtDecoder. En el test se simula;
+    // jwt() inyecta la autenticación directamente, sin decodificar ningún token real.
+    @MockBean
+    private JwtDecoder jwtDecoder;
+
+    private static RequestPostProcessor admin() {
+        return jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    }
+
+    private static RequestPostProcessor cliente() {
+        return jwt().authorities(new SimpleGrantedAuthority("ROLE_CLIENTE"));
+    }
     private Plato platoDeEjemplo(Long id) {
         Plato plato = new Plato("Lomo Saltado", "Plato de fondo con papas fritas",
                 new BigDecimal("28.50"), CategoriaPlato.PRINCIPAL);
@@ -63,11 +78,10 @@ class PlatoRestControllerTest {
     // ---------- GET /api/platos ----------
 
     @Test
-    @WithMockUser
     void listarPlatos_devuelveListaConStatus200() throws Exception {
         when(cartaService.todos()).thenReturn(List.of(platoDeEjemplo(1L), platoDeEjemplo(2L)));
 
-        mockMvc.perform(get("/api/platos"))
+        mockMvc.perform(get("/api/platos").with(cliente()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].nombre").value("Lomo Saltado"));
@@ -78,7 +92,6 @@ class PlatoRestControllerTest {
     // ---------- POST /api/platos ----------
 
     @Test
-    @WithMockUser
     void crearPlato_conDatosValidos_devuelve201() throws Exception {
         PlatoRequestDTO request = new PlatoRequestDTO(
                 "Ceviche", "Pescado fresco marinado en limón",
@@ -90,6 +103,7 @@ class PlatoRestControllerTest {
         when(cartaService.guardar(any(Plato.class))).thenReturn(guardado);
 
         mockMvc.perform(post("/api/platos")
+                        .with(admin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -103,7 +117,6 @@ class PlatoRestControllerTest {
     // ---------- PUT /api/platos/{id} ----------
 
     @Test
-    @WithMockUser
     void actualizarPlato_existente_devuelve200() throws Exception {
         Long id = 1L;
         PlatoRequestDTO request = new PlatoRequestDTO(
@@ -115,6 +128,7 @@ class PlatoRestControllerTest {
         when(cartaService.guardar(any(Plato.class))).thenReturn(existente);
 
         mockMvc.perform(put("/api/platos/{id}", id)
+                        .with(admin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -125,7 +139,6 @@ class PlatoRestControllerTest {
     }
 
     @Test
-    @WithMockUser
     void actualizarPlato_inexistente_devuelve404() throws Exception {
         Long id = 999L;
         PlatoRequestDTO request = new PlatoRequestDTO(
@@ -134,6 +147,7 @@ class PlatoRestControllerTest {
         when(cartaService.buscarPorId(id)).thenReturn(Optional.empty());
 
         mockMvc.perform(put("/api/platos/{id}", id)
+                        .with(admin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -144,26 +158,98 @@ class PlatoRestControllerTest {
     // ---------- DELETE /api/platos/{id} ----------
 
     @Test
-    @WithMockUser
     void eliminarPlato_existente_devuelve204() throws Exception {
         Long id = 1L;
         when(cartaService.buscarPorId(id)).thenReturn(Optional.of(platoDeEjemplo(id)));
 
-        mockMvc.perform(delete("/api/platos/{id}", id))
+        mockMvc.perform(delete("/api/platos/{id}", id).with(admin()))
                 .andExpect(status().isNoContent());
 
         verify(cartaService).eliminar(id);
     }
 
     @Test
-    @WithMockUser
     void eliminarPlato_inexistente_devuelve404() throws Exception {
         Long id = 999L;
         when(cartaService.buscarPorId(id)).thenReturn(Optional.empty());
 
-        mockMvc.perform(delete("/api/platos/{id}", id))
+        mockMvc.perform(delete("/api/platos/{id}", id).with(admin()))
                 .andExpect(status().isNotFound());
 
         verify(cartaService, never()).eliminar(eq(id));
+    }
+
+    // ---------- Seguridad JWT (Fase 4) ----------
+
+    @Test
+    void sinToken_devuelve401() throws Exception {
+        mockMvc.perform(get("/api/platos"))
+                .andExpect(status().isUnauthorized());
+
+        verify(cartaService, never()).todos();
+    }
+
+    @Test
+    void cliente_noPuedeCrear_devuelve403() throws Exception {
+        PlatoRequestDTO request = new PlatoRequestDTO(
+                "Ceviche", "Pescado fresco", new BigDecimal("32.00"), CategoriaPlato.PRINCIPAL);
+
+        mockMvc.perform(post("/api/platos")
+                        .with(cliente())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+
+        verify(cartaService, never()).guardar(any(Plato.class));
+    }
+
+    @Test
+    void cliente_noPuedeActualizar_devuelve403() throws Exception {
+        PlatoRequestDTO request = new PlatoRequestDTO(
+                "Ceviche", "Pescado fresco", new BigDecimal("32.00"), CategoriaPlato.PRINCIPAL);
+
+        mockMvc.perform(put("/api/platos/{id}", 1L)
+                        .with(cliente())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+
+        verify(cartaService, never()).guardar(any(Plato.class));
+    }
+
+    @Test
+    void cliente_noPuedeEliminar_devuelve403() throws Exception {
+        mockMvc.perform(delete("/api/platos/{id}", 1L).with(cliente()))
+                .andExpect(status().isForbidden());
+
+        verify(cartaService, never()).eliminar(any());
+    }
+
+    @Test
+    void admin_crearPlatoInvalido_devuelve400() throws Exception {
+        PlatoRequestDTO invalido = new PlatoRequestDTO("", "x", new BigDecimal("-5"), null);
+
+        mockMvc.perform(post("/api/platos")
+                        .with(admin())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalido)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.estado").value(400))
+                .andExpect(jsonPath("$.errores").isNotEmpty());
+
+        verify(cartaService, never()).guardar(any(Plato.class));
+    }
+
+    @Test
+    void admin_eliminarPlatoUsado_devuelve409() throws Exception {
+        Long id = 1L;
+        when(cartaService.buscarPorId(id)).thenReturn(Optional.of(platoDeEjemplo(id)));
+        doThrow(new IllegalStateException("No se puede eliminar el plato: ya fue usado en reservas."))
+                .when(cartaService).eliminar(id);
+
+        mockMvc.perform(delete("/api/platos/{id}", id).with(admin()))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.mensaje")
+                        .value("No se puede eliminar el plato: ya fue usado en reservas."));
     }
 }

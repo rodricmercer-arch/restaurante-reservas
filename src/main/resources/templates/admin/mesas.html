@@ -12,17 +12,10 @@
 <div class="container">
     <h3>Mesas</h3>
 
-    <form th:action="@{/admin/mesas}" method="post" class="row g-2 mb-4">
-        <div class="col-auto">
-            <input type="number" name="numero" class="form-control" placeholder="N° de mesa" required>
-        </div>
-        <div class="col-auto">
-            <input type="number" name="capacidad" class="form-control" placeholder="Capacidad" required>
-        </div>
-        <div class="col-auto">
-            <button type="submit" class="btn btn-danger">Agregar mesa</button>
-        </div>
-    </form>
+    <div class="alert alert-success" th:if="${mensaje}" th:text="${mensaje}"></div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+    <a th:href="@{/admin/mesas/nueva}" class="btn btn-danger mb-4">Nueva mesa</a>
 
     <table class="table table-bordered bg-white">
         <thead>
@@ -34,6 +27,7 @@
             <td th:text="${mesa.capacidad}"></td>
             <td th:text="${mesa.estado}"></td>
             <td>
+                <a th:href="@{/admin/mesas/editar/{id}(id=${mesa.id})}" class="btn btn-sm btn-outline-secondary me-1">Editar</a>
                 <form th:action="@{/admin/mesas/eliminar/{id}(id=${mesa.id})}" method="post" style="display:inline">
                     <button class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar mesa?');">Eliminar</button>
                 </form>
