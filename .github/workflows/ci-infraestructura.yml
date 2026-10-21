@@ -5,9 +5,10 @@ name: CI Infraestructura - Docker
 # Se ejecuta al hacer push a la rama del Integrante 5 y en cada Pull Request hacia dev o main.
 on:
   push:
-    branches: [feature/infraestructura-docs]
+    branches: [feature/infraestructura-docs, main]
   pull_request:
     branches: [dev, main]
+  workflow_dispatch:
 
 permissions:
   contents: read
