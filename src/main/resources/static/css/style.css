@@ -630,3 +630,182 @@ a { text-decoration: none; }
 .container-narrow { max-width: 1140px; margin: 0 auto; padding: 0 16px; }
 
 .login-card { max-width: 380px; margin: 80px auto; }
+
+/* ===== Acceso público (Fase 6) ===== */
+.navbar-restaurante .btn-nav-login {
+    display: inline-block;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: #fff;
+    border-radius: 8px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+.navbar-restaurante .btn-nav-login:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+
+.navbar-restaurante .btn-nav-registro {
+    display: inline-block;
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    color: #fff;
+    border-radius: 8px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+.navbar-restaurante .btn-nav-registro:hover {
+    background: var(--accent-dark);
+    border-color: var(--accent-dark);
+    color: #fff;
+}
+
+/* El "Reservar mesa" anónimo es un <button>; debe verse igual que el <a> */
+button.btn-reservar {
+    border: none;
+    width: 100%;
+    cursor: pointer;
+}
+
+/* Tarjetas de la carta pública: solo lectura */
+.dish-card.readonly {
+    cursor: default;
+}
+.dish-card.readonly:hover {
+    border-color: var(--line);
+    box-shadow: none;
+    transform: none;
+}
+
+/* Ícono del modal "Inicia sesión para continuar" */
+.modal-login-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: rgba(192, 57, 43, 0.12);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+}
+
+/* Igualar los botones de acceso a la forma de .btn-logout (píldora) */
+.navbar-restaurante .btn-nav-login,
+.navbar-restaurante .btn-nav-registro {
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-size: 0.82rem;
+}
+.navbar-restaurante .btn-nav-login {
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* ===== Mejora visual: fotos de platos, mesas y cabecera (Fase 8) ===== */
+
+/* BASE de toda foto de plato (carta de reserva, carta pública, Mi reserva y panel admin).
+   Fondo suave + ícono dorado centrado; el <img> se superpone y lo tapa. Si la foto falla, queda el ícono. */
+.dish-img {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--accent-soft), rgba(201, 138, 75, 0.18));
+    color: var(--gold);
+}
+.dish-img img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Miniatura grande: tarjetas de la carta del flujo de reserva (cliente/carta.html). */
+.dish-thumb { width: 72px; height: 72px; border-radius: 12px; flex-shrink: 0; }
+.dish-thumb i { font-size: 1.5rem; }
+
+/* Miniatura chica: líneas del pedido en "Mi reserva" y columna Imagen del panel admin. */
+.dish-mini { width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0; }
+.dish-mini i { font-size: 1rem; }
+
+/* Banner superior de las tarjetas de la carta pública (/carta). */
+.dish-banner { width: 100%; height: 170px; border-radius: 14px 14px 0 0; }
+.dish-banner i { font-size: 2.5rem; }
+
+/* Bloque de texto (nombre + descripción) dentro de .dish-card: ocupa el espacio sobrante sin desbordar. */
+.dish-info { flex: 1; min-width: 0; }
+
+/* Carta del flujo de reserva: imagen, texto y precio/check alineados al centro y con separación.
+   Selector más específico (.dish-option .dish-card) para no editar la regla original de .dish-card. */
+.dish-option .dish-card { align-items: center; gap: 14px; }
+.dish-option .dish-card .text-end { flex-shrink: 0; }
+
+/* Tarjeta vertical de la carta pública (/carta): foto arriba y cuerpo con padding. */
+.dish-public {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    height: 100%;
+}
+.dish-public-body { padding: 14px 16px; }
+.dish-public .dish-price { margin-top: 8px; }
+
+/* Tarjetas de mesa (/ y /cliente/mesas): recorta la foto con las esquinas redondeadas de la tarjeta. */
+.card-mesa { overflow: hidden; }
+
+/* Foto superior de cada mesa. Si la imagen falta, queda el fondo oscuro (nunca un recuadro roto). */
+.mesa-img {
+    position: relative;
+    height: 130px;
+    border-radius: 18px 18px 0 0;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--dark-2);
+}
+.mesa-img-2 {
+    background-image: linear-gradient(to top, rgba(36, 24, 18, .55), rgba(36, 24, 18, .05)),
+                      url('../img/mesas/mesa-2.jpg');
+}
+.mesa-img-4 {
+    background-image: linear-gradient(to top, rgba(36, 24, 18, .55), rgba(36, 24, 18, .05)),
+                      url('../img/mesas/mesa-4.jpg');
+}
+.mesa-img-grupo {
+    background-image: linear-gradient(to top, rgba(36, 24, 18, .55), rgba(36, 24, 18, .05)),
+                      url('../img/mesas/mesa-grupo.jpg');
+}
+
+/* Insignia Libre/Reservada: se posiciona sobre la foto de la mesa y se le da fondo blanco para que se lea sobre la foto. */
+.mesa-img .mesa-top { position: absolute; top: 10px; left: 10px; margin: 0; }
+.mesa-img .badge-estado { background: rgba(255, 255, 255, 0.92); }
+
+/* Cabecera "Elige tu mesa" (solo cliente/mesas.html). Tres capas: degradado oscuro + hero.jpg + la foto remota de antes.
+   Si falta hero.jpg se ve la foto remota de siempre; si fallan ambas, queda el fondo oscuro sólido con texto claro. */
+.hero-section.hero-con-imagen {
+    background-color: var(--dark);
+    background-image: linear-gradient(120deg, rgba(36, 24, 18, 0.88), rgba(36, 24, 18, 0.45)),
+                      url('../img/hero.jpg'),
+                      url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1400&q=80');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 22px;
+    color: #fff;
+}
+.hero-con-imagen .hero-eyebrow { color: var(--gold); }
+.hero-con-imagen .hero-title { color: #fff; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35); }
+.hero-con-imagen .hero-subtitle { color: rgba(255, 255, 255, 0.88); }
+.hero-con-imagen .hero-stat { background: rgba(0, 0, 0, 0.4); border-color: rgba(255, 255, 255, 0.22); }
+.hero-con-imagen .hero-stat .lbl { color: rgba(255, 255, 255, 0.85); }

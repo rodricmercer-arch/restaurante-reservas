@@ -49,11 +49,14 @@
             </div>
 
             <div class="lbl mb-2" style="color: var(--muted); text-transform: uppercase; font-size: .72rem; letter-spacing: 1px;">Pedido</div>
-            <div class="rc-pedido-line" th:each="d : ${reserva.detalles}">
-                <span>
-                    <span class="cat d-block" th:text="${d.plato.categoria}"></span>
-                    <span th:text="${d.plato.nombre}"></span>
-                </span>
+            <div class="rc-pedido-line align-items-center" th:each="d : ${reserva.detalles}">
+                <div class="d-flex align-items-center gap-3">
+                    <div th:replace="~{fragments/layout :: platoImg(${d.plato}, 'dish-mini')}"></div>
+                    <span>
+                        <span class="cat d-block" th:text="${d.plato.categoria}"></span>
+                        <span th:text="${d.plato.nombre}"></span>
+                    </span>
+                </div>
                 <span class="fw-semibold">S/ <span th:text="${d.plato.precio}"></span></span>
             </div>
 

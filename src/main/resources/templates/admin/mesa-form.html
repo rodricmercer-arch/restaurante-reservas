@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario de Mesa</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: navbar('mesas')}"></div>
+
+<div class="container">
+    <h3 th:text="${mesa.id == null} ? 'Nueva mesa' : 'Editar mesa'"></h3>
+
+    <form th:action="@{/admin/mesas/guardar}" th:object="${mesa}" method="post" class="col-md-6" novalidate>
+        <input type="hidden" th:field="*{id}">
+
+        <div class="mb-3">
+            <label for="numero" class="form-label">N° de mesa</label>
+            <input type="number" th:field="*{numero}" class="form-control"
+                   th:classappend="${#fields.hasErrors('numero')} ? 'is-invalid'">
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('numero')}" th:errors="*{numero}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label for="capacidad" class="form-label">Capacidad (1 a 20)</label>
+            <input type="number" th:field="*{capacidad}" class="form-control"
+                   th:classappend="${#fields.hasErrors('capacidad')} ? 'is-invalid'">
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('capacidad')}" th:errors="*{capacidad}"></div>
+        </div>
+
+        <button type="submit" class="btn btn-danger">Guardar</button>
+        <a th:href="@{/admin/mesas}" class="btn btn-outline-secondary">Cancelar</a>
+    </form>
+</div>
+</body>
+</html>

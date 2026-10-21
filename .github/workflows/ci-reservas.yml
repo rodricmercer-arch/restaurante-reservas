@@ -1,0 +1,43 @@
+name: CI Reservas - Empaquetado
+
+# Proposito: generar el archivo .jar ejecutable de la aplicacion y guardarlo como artefacto.
+# Se ejecuta al hacer push a la rama del Integrante 4 y en cada Pull Request hacia dev o main.
+on:
+  push:
+    branches: [feature/reservas]
+  pull_request:
+    branches: [dev, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-reservas-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  empaquetar:
+    name: Generar JAR
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Descargar el codigo
+        uses: actions/checkout@v6
+
+      - name: Preparar Java 17 con cache de Maven
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Empaquetar sin ejecutar pruebas
+        run: mvn -B -ntp clean package -DskipTests
+
+      - name: Guardar el JAR generado
+        uses: actions/upload-artifact@v7
+        with:
+          name: reservas-jar
+          path: target/*.jar
+          retention-days: 7
+          if-no-files-found: error
