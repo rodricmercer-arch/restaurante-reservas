@@ -1,0 +1,57 @@
+name: CI Infraestructura - Docker
+
+# Proposito: validar docker-compose.yml, construir la imagen, levantar app + MySQL
+# y comprobar que la pagina /login responde con HTTP 200.
+# Se ejecuta al hacer push a la rama del Integrante 5 y en cada Pull Request hacia dev o main.
+on:
+  push:
+    branches: [feature/infraestructura-docs]
+  pull_request:
+    branches: [dev, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-infraestructura-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docker:
+    name: Construir y probar con Docker Compose
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Descargar el codigo
+        uses: actions/checkout@v6
+
+      - name: Validar docker-compose.yml
+        run: docker compose config --quiet
+
+      - name: Construir la imagen de la aplicacion
+        run: docker compose build
+
+      - name: Levantar aplicacion y MySQL
+        run: docker compose up -d
+
+      - name: Esperar a que la aplicacion responda en /login
+        run: |
+          for i in $(seq 1 40); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/login || true)
+            if [ "$code" = "200" ]; then
+              echo "La aplicacion respondio HTTP 200 en el intento $i"
+              exit 0
+            fi
+            echo "Intento $i de 40: HTTP $code"
+            sleep 5
+          done
+          echo "La aplicacion no respondio a tiempo"
+          exit 1
+
+      - name: Mostrar registros si algo fallo
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: Apagar y limpiar
+        if: always()
+        run: docker compose down -v
