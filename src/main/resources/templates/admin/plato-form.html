@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario de Plato</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: navbar('platos')}"></div>
+
+<div class="container">
+    <h3 th:text="${plato.id == null} ? 'Nuevo plato' : 'Editar plato'"></h3>
+
+    <form th:action="@{/admin/platos/guardar}" th:object="${plato}" method="post" class="col-md-6" novalidate>
+        <input type="hidden" th:field="*{id}">
+
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input type="text" th:field="*{nombre}" class="form-control"
+                   th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid'">
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <input type="text" th:field="*{descripcion}" class="form-control"
+                   th:classappend="${#fields.hasErrors('descripcion')} ? 'is-invalid'">
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label for="imagen" class="form-label">Imagen (ruta o URL)</label>
+            <input type="text" th:field="*{imagen}" class="form-control"
+                   placeholder="img/platos/mi-plato.jpg o https://..."
+                   th:classappend="${#fields.hasErrors('imagen')} ? 'is-invalid'">
+            <div class="form-text">Opcional. Ruta dentro de static/ (sin barra inicial) o URL completa.</div>
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('imagen')}" th:errors="*{imagen}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label for="precio" class="form-label">Precio</label>
+            <input type="number" step="0.01" th:field="*{precio}" class="form-control"
+                   th:classappend="${#fields.hasErrors('precio')} ? 'is-invalid'">
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('precio')}" th:errors="*{precio}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label for="categoria" class="form-label">Categoría</label>
+            <select th:field="*{categoria}" class="form-select"
+                    th:classappend="${#fields.hasErrors('categoria')} ? 'is-invalid'">
+                <option value="">-- Seleccione --</option>
+                <option th:each="c : ${categorias}" th:value="${c}" th:text="${c}"></option>
+            </select>
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('categoria')}" th:errors="*{categoria}"></div>
+        </div>
+
+        <button type="submit" class="btn btn-danger">Guardar</button>
+        <a th:href="@{/admin/platos}" class="btn btn-outline-secondary">Cancelar</a>
+    </form>
+</div>
+</body>
+</html>

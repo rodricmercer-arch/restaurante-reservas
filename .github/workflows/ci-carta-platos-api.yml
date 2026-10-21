@@ -1,0 +1,50 @@
+name: CI Carta y API - Calidad de codigo
+
+# Proposito: revisar el estilo del codigo con Checkstyle (reglas de Google).
+# Modo informativo: muestra las advertencias y guarda el informe, pero NO hace fallar el workflow.
+# Se ejecuta al hacer push a la rama del Integrante 3 y en cada Pull Request hacia dev o main.
+on:
+  push:
+    branches: [feature/carta-platos-api]
+  pull_request:
+    branches: [dev, main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-carta-platos-api-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  calidad:
+    name: Checkstyle
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Descargar el codigo
+        uses: actions/checkout@v6
+
+      - name: Preparar Java 17 con cache de Maven
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Revisar estilo con Checkstyle
+        run: >
+          mvn -B -ntp
+          org.apache.maven.plugins:maven-checkstyle-plugin:3.3.1:check
+          -Dcheckstyle.config.location=google_checks.xml
+          -Dcheckstyle.failOnViolation=false
+          -Dcheckstyle.consoleOutput=true
+
+      - name: Guardar informe de Checkstyle
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: informe-checkstyle
+          path: target/checkstyle-result.xml
+          retention-days: 7
+          if-no-files-found: warn
