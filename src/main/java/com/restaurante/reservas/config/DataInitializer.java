@@ -7,9 +7,21 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
+
+    // Foto por defecto de cada plato de ejemplo: clave = nombre exacto del plato; valor = ruta dentro de static/ (sin barra inicial).
+    private static final Map<String, String> IMAGENES_PLATOS = Map.of(
+            "Lomo Saltado", "img/platos/lomo-saltado.jpg",
+            "Arroz con Pollo", "img/platos/arroz-con-pollo.jpg",
+            "Tallarines Verdes", "img/platos/tallarines-verdes.jpg",
+            "Suspiro a la Limeña", "img/platos/suspiro-a-la-limena.jpg",
+            "Mazamorra Morada", "img/platos/mazamorra-morada.jpg",
+            "Chicha Morada", "img/platos/chicha-morada.jpg",
+            "Gaseosa", "img/platos/gaseosa.jpg"
+    );
 
     private final UsuarioRepository usuarioRepository;
     private final MesaRepository mesaRepository;
@@ -55,6 +67,16 @@ public class DataInitializer implements CommandLineRunner {
 
             platoRepository.save(new Plato("Chicha Morada", "Bebida tradicional", new BigDecimal("8.00"), CategoriaPlato.BEBIDA));
             platoRepository.save(new Plato("Gaseosa", "500 ml", new BigDecimal("6.00"), CategoriaPlato.BEBIDA));
+        }
+
+        // Imágenes por defecto: rellena los platos (nuevos o ya existentes) que todavía no tengan imagen.
+        for (Plato plato : platoRepository.findAll()) {
+            boolean sinImagen = plato.getImagen() == null || plato.getImagen().isBlank();
+            String ruta = IMAGENES_PLATOS.get(plato.getNombre());
+            if (sinImagen && ruta != null) {
+                plato.setImagen(ruta);
+                platoRepository.save(plato);
+            }
         }
     }
 }
