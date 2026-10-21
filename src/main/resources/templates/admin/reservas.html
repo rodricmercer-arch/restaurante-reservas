@@ -12,6 +12,36 @@
 <div class="container">
     <h3>Todas las reservas</h3>
 
+    <div class="alert alert-success" th:if="${mensaje}" th:text="${mensaje}"></div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+
+    <form th:action="@{/admin/reservas}" method="get" class="row g-2 mb-4 align-items-end">
+        <div class="col-md-3">
+            <label for="dni" class="form-label">DNI del cliente</label>
+            <input id="dni" type="text" name="dni" class="form-control" placeholder="Ej. 1111" th:value="${dni}">
+        </div>
+        <div class="col-md-2">
+            <label for="estado" class="form-label">Estado</label>
+            <select id="estado" name="estado" class="form-select">
+                <option value="">Todos</option>
+                <option th:each="e : ${estados}" th:value="${e}" th:text="${e}" th:selected="${e == estado}"></option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label for="desde" class="form-label">Desde</label>
+            <input id="desde" type="date" name="desde" class="form-control" th:value="${desde}">
+        </div>
+        <div class="col-md-2">
+            <label for="hasta" class="form-label">Hasta</label>
+            <input id="hasta" type="date" name="hasta" class="form-control" th:value="${hasta}">
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-danger">Filtrar</button>
+            <a th:href="@{/admin/reservas}" class="btn btn-outline-secondary">Limpiar</a>
+        </div>
+    </form>
+    
     <table class="table table-bordered bg-white align-middle">
         <thead>
         <tr><th>Cliente</th><th>Mesa</th><th>Fecha</th><th>Estado</th><th>Pedido</th><th>Acciones</th></tr>

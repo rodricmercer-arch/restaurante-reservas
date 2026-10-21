@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Reportes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: navbar('reportes')}"></div>
+
+<div class="container">
+    <h3>Reportes</h3>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h6 class="text-muted mb-1">Ingreso estimado</h6>
+            <div class="fs-3 fw-bold"
+                 th:text="'S/ ' + ${#numbers.formatDecimal(reporte.ingresoEstimado(), 1, 'COMMA', 2, 'POINT')}"></div>
+            <small class="text-muted">Suma de cantidad × precio de los platos pedidos, sin contar reservas canceladas.</small>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <h5>Reservas por estado</h5>
+            <table class="table table-bordered bg-white align-middle">
+                <thead><tr><th>Estado</th><th>Cant.</th><th style="width:45%">Proporción</th></tr></thead>
+                <tbody>
+                <tr th:each="e : ${reporte.reservasPorEstado()}"
+                    th:with="pct=${reporte.porcentaje(e.value, reporte.reservasPorEstado())}">
+                    <td th:text="${e.key}"></td>
+                    <td th:text="${e.value}"></td>
+                    <td>
+                        <div class="progress">
+                            <div class="progress-bar bg-danger" role="progressbar"
+                                 th:style="'width:' + ${pct} + '%'" th:text="${pct} + '%'"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#maps.isEmpty(reporte.reservasPorEstado())}">
+                    <td colspan="3" class="text-center text-muted">Sin datos</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-lg-4">
+            <h5>Mesas por estado</h5>
+            <table class="table table-bordered bg-white align-middle">
+                <thead><tr><th>Estado</th><th>Cant.</th><th style="width:45%">Proporción</th></tr></thead>
+                <tbody>
+                <tr th:each="e : ${reporte.mesasPorEstado()}"
+                    th:with="pct=${reporte.porcentaje(e.value, reporte.mesasPorEstado())}">
+                    <td th:text="${e.key}"></td>
+                    <td th:text="${e.value}"></td>
+                    <td>
+                        <div class="progress">
+                            <div class="progress-bar bg-danger" role="progressbar"
+                                 th:style="'width:' + ${pct} + '%'" th:text="${pct} + '%'"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#maps.isEmpty(reporte.mesasPorEstado())}">
+                    <td colspan="3" class="text-center text-muted">Sin datos</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-lg-4">
+            <h5>Platos por categoría</h5>
+            <table class="table table-bordered bg-white align-middle">
+                <thead><tr><th>Categoría</th><th>Cant.</th><th style="width:45%">Proporción</th></tr></thead>
+                <tbody>
+                <tr th:each="e : ${reporte.platosPorCategoria()}"
+                    th:with="pct=${reporte.porcentaje(e.value, reporte.platosPorCategoria())}">
+                    <td th:text="${e.key}"></td>
+                    <td th:text="${e.value}"></td>
+                    <td>
+                        <div class="progress">
+                            <div class="progress-bar bg-danger" role="progressbar"
+                                 th:style="'width:' + ${pct} + '%'" th:text="${pct} + '%'"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#maps.isEmpty(reporte.platosPorCategoria())}">
+                    <td colspan="3" class="text-center text-muted">Sin datos</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <h5 class="mt-2">Top 5 platos más reservados</h5>
+    <table class="table table-bordered bg-white align-middle">
+        <thead><tr><th>#</th><th>Plato</th><th>Unidades</th><th style="width:45%">Frente al más pedido</th></tr></thead>
+        <tbody>
+        <tr th:each="t, it : ${reporte.topPlatos()}"
+            th:with="pct=${reporte.porcentajeTop(t.unidades())}">
+            <td th:text="${it.count}"></td>
+            <td th:text="${t.nombre()}"></td>
+            <td th:text="${t.unidades()}"></td>
+            <td>
+                <div class="progress">
+                    <div class="progress-bar bg-danger" role="progressbar"
+                         th:style="'width:' + ${pct} + '%'" th:text="${pct} + '%'"></div>
+                </div>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(reporte.topPlatos())}">
+            <td colspan="4" class="text-center text-muted">Aún no hay reservas con platos.</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

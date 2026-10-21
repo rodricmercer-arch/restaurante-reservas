@@ -1,6 +1,7 @@
 package com.restaurante.reservas.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 @Entity
 @Table(name = "detalle_reserva")
@@ -18,6 +19,8 @@ public class DetalleReserva {
     @JoinColumn(name = "plato_id")
     private Plato plato;
 
+    @NotNull(message = "La cantidad es obligatoria")
+    @Min(value = 1, message = "La cantidad debe ser al menos 1")
     @Column(nullable = false)
     private Integer cantidad = 1;
 
