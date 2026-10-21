@@ -1,0 +1,49 @@
+# Levanta la aplicacion (Spring Boot) y su base de datos (MySQL).
+# Uso:  docker compose up --build
+# Los valores por defecto sirven para desarrollo; se pueden cambiar con variables de entorno
+# o con un archivo .env en la misma carpeta (no lo subas a Git).
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: restaurante-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: restaurante_db
+    ports:
+      # Puerto 3307 en tu PC para no chocar con un MySQL local que use el 3306
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  app:
+    build: .
+    container_name: restaurante-app
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      # Reemplazan los valores de application.properties sin modificar el codigo
+      SPRING_DATASOURCE_URL: "jdbc:mysql://db:3306/restaurante_db?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true"
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      SPRING_JPA_SHOW_SQL: "false"
+      SPRING_THYMELEAF_CACHE: "true"
+      # Debe tener minimo 32 caracteres; cambialo fuera de desarrollo
+      JWT_SECRET: ${JWT_SECRET:-clave-de-desarrollo-reservas-restaurante-2026-minimo-32}
+      # Notificaciones por Telegram: apagadas por defecto
+      APP_NOTIFICACIONES_TELEGRAM_ENABLED: ${TELEGRAM_ENABLED:-false}
+      APP_NOTIFICACIONES_TELEGRAM_TOKEN: ${TELEGRAM_TOKEN:-}
+      APP_NOTIFICACIONES_TELEGRAM_CHATID: ${TELEGRAM_CHATID:-}
+    restart: on-failure
+
+volumes:
+  db_data:
