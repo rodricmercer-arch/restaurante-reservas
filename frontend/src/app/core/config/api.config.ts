@@ -1,5 +1,5 @@
 /** Única fuente de la URL base de la API REST (Spring Boot). Todo servicio e interceptor parte de aquí. */
-export const API_URL = 'https://restaurante-deploy.onrender.com/api';
+export const API_URL = 'http://localhost:8080/api';
 
 /** Rutas que NO llevan token y cuyos 401/403 no cierran la sesión (el 401 del login es "clave incorrecta"). */
 const RUTAS_SIN_TOKEN: readonly string[] = [
