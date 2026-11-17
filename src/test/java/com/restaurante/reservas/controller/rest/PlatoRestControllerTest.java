@@ -100,7 +100,7 @@ class PlatoRestControllerTest {
         Plato guardado = platoDeEjemplo(10L);
         guardado.setNombre("Ceviche");
 
-        when(cartaService.guardar(any(Plato.class))).thenReturn(guardado);
+        when(cartaService.crear(any(Plato.class))).thenReturn(guardado);
 
         mockMvc.perform(post("/api/platos")
                         .with(admin())
@@ -111,7 +111,7 @@ class PlatoRestControllerTest {
                 .andExpect(jsonPath("$.id").value(10))
                 .andExpect(jsonPath("$.nombre").value("Ceviche"));
 
-        verify(cartaService).guardar(any(Plato.class));
+        verify(cartaService).crear(any(Plato.class));
     }
 
     // ---------- PUT /api/platos/{id} ----------
@@ -125,7 +125,7 @@ class PlatoRestControllerTest {
 
         Plato existente = platoDeEjemplo(id);
         when(cartaService.buscarPorId(id)).thenReturn(Optional.of(existente));
-        when(cartaService.guardar(any(Plato.class))).thenReturn(existente);
+        when(cartaService.actualizar(eq(id), any(Plato.class))).thenReturn(existente);
 
         mockMvc.perform(put("/api/platos/{id}", id)
                         .with(admin())
@@ -135,7 +135,7 @@ class PlatoRestControllerTest {
                 .andExpect(jsonPath("$.id").value(id));
 
         verify(cartaService).buscarPorId(id);
-        verify(cartaService).guardar(any(Plato.class));
+        verify(cartaService).actualizar(eq(id), any(Plato.class));
     }
 
     @Test
@@ -152,7 +152,7 @@ class PlatoRestControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
 
-        verify(cartaService, never()).guardar(any(Plato.class));
+        verify(cartaService, never()).actualizar(any(), any(Plato.class));
     }
 
     // ---------- DELETE /api/platos/{id} ----------
@@ -200,7 +200,7 @@ class PlatoRestControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
 
-        verify(cartaService, never()).guardar(any(Plato.class));
+        verify(cartaService, never()).crear(any(Plato.class));
     }
 
     @Test
@@ -214,7 +214,7 @@ class PlatoRestControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
 
-        verify(cartaService, never()).guardar(any(Plato.class));
+        verify(cartaService, never()).actualizar(any(), any(Plato.class));
     }
 
     @Test
@@ -237,7 +237,7 @@ class PlatoRestControllerTest {
                 .andExpect(jsonPath("$.estado").value(400))
                 .andExpect(jsonPath("$.errores").isNotEmpty());
 
-        verify(cartaService, never()).guardar(any(Plato.class));
+        verify(cartaService, never()).crear(any(Plato.class));
     }
 
     @Test
