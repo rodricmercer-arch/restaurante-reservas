@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -38,14 +39,19 @@ public class PlatoRestController {
 
     // GET /api/platos            -> todos los platos
     // GET /api/platos?categoria=PRINCIPAL -> filtrados por categoría
-    @Operation(summary = "Lista los platos, con filtro opcional por categoría")
+    @Operation(summary = "Lista los platos, con filtros opcionales: texto, categoría y rango de precio")
     @GetMapping
     public ResponseEntity<List<PlatoResponseDTO>> listar(
-            @RequestParam(required = false) CategoriaPlato categoria) {
+            @RequestParam(required = false) String texto,
+            @RequestParam(required = false) CategoriaPlato categoria,
+            @RequestParam(required = false) BigDecimal precioMin,
+            @RequestParam(required = false) BigDecimal precioMax) {
 
-        List<Plato> platos = (categoria != null)
-                ? cartaService.buscarPorCategoria(categoria)
-                : cartaService.todos();
+        // Sin ningún filtro se conserva el camino anterior (todos()); con alguno, la búsqueda avanzada.
+        boolean sinFiltros = texto == null && categoria == null && precioMin == null && precioMax == null;
+        List<Plato> platos = sinFiltros
+                ? cartaService.todos()
+                : cartaService.buscarAvanzado(texto, categoria, precioMin, precioMax);
 
         List<PlatoResponseDTO> respuesta = platos.stream()
                 .map(PlatoResponseDTO::fromEntity)
@@ -75,8 +81,10 @@ public class PlatoRestController {
                 request.getPrecio(),
                 request.getCategoria()
         );
+        nuevo.setImagen(request.getImagen());
 
-        Plato guardado = cartaService.guardar(nuevo);
+        // crear() valida nombre duplicado (IllegalStateException -> 409) y normaliza la imagen.
+        Plato guardado = cartaService.crear(nuevo);
         PlatoResponseDTO respuesta = PlatoResponseDTO.fromEntity(guardado);
 
         URI location = URI.create("/api/platos/" + guardado.getId());
@@ -95,13 +103,16 @@ public class PlatoRestController {
             return ResponseEntity.notFound().build();
         }
 
-        Plato plato = existente.get();
-        plato.setNombre(request.getNombre());
-        plato.setDescripcion(request.getDescripcion());
-        plato.setPrecio(request.getPrecio());
-        plato.setCategoria(request.getCategoria());
+        // actualizar() busca el plato, valida nombre duplicado (409) y normaliza la imagen.
+        Plato datos = new Plato(
+                request.getNombre(),
+                request.getDescripcion(),
+                request.getPrecio(),
+                request.getCategoria()
+        );
+        datos.setImagen(request.getImagen());
 
-        Plato actualizado = cartaService.guardar(plato);
+        Plato actualizado = cartaService.actualizar(id, datos);
         return ResponseEntity.ok(PlatoResponseDTO.fromEntity(actualizado));
     }
 
