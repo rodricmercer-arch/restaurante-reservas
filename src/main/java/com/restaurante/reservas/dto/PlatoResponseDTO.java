@@ -17,6 +17,7 @@ public class PlatoResponseDTO {
     private String descripcion;
     private BigDecimal precio;
     private CategoriaPlato categoria;
+    private String imagen;
 
     public PlatoResponseDTO() {
     }
@@ -29,6 +30,12 @@ public class PlatoResponseDTO {
         this.categoria = categoria;
     }
 
+    public PlatoResponseDTO(Long id, String nombre, String descripcion, BigDecimal precio,
+                            CategoriaPlato categoria, String imagen) {
+        this(id, nombre, descripcion, precio, categoria);
+        this.imagen = imagen;
+    }
+
     /**
      * Fábrica de conveniencia para mapear la entidad JPA Plato a este DTO,
      * sin exponer la entidad directamente en las respuestas de la API.
@@ -39,7 +46,8 @@ public class PlatoResponseDTO {
                 plato.getNombre(),
                 plato.getDescripcion(),
                 plato.getPrecio(),
-                plato.getCategoria()
+                plato.getCategoria(),
+                plato.getImagen()
         );
     }
 
@@ -81,5 +89,13 @@ public class PlatoResponseDTO {
 
     public void setCategoria(CategoriaPlato categoria) {
         this.categoria = categoria;
+    }
+
+    public String getImagen() {
+        return imagen;
+    }
+
+    public void setImagen(String imagen) {
+        this.imagen = imagen;
     }
 }

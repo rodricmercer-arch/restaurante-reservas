@@ -29,6 +29,9 @@ public class PlatoRequestDTO {
     @NotNull(message = "La categoría es obligatoria")
     private CategoriaPlato categoria;
 
+    @Size(max = 255, message = "La ruta de la imagen no puede superar los 255 caracteres")
+    private String imagen;
+
     public PlatoRequestDTO() {
     }
 
@@ -69,5 +72,13 @@ public class PlatoRequestDTO {
 
     public void setCategoria(CategoriaPlato categoria) {
         this.categoria = categoria;
+    }
+
+    public String getImagen() {
+        return imagen;
+    }
+
+    public void setImagen(String imagen) {
+        this.imagen = imagen;
     }
 }
