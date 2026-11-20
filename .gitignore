@@ -14,4 +14,3 @@ Thumbs.db
 *.log
 
 # Secretos locales (token y chat id del bot de Telegram): nunca se suben a Git
-config-local.properties
